@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import BotonNotificaciones from './BotonNotificaciones';
 import Login from './Login';
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://tambo-backend-v6yp.onrender.com';
+
 function App() {
   const [vacasEnAlerta, setVacasEnAlerta] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -12,8 +14,8 @@ function App() {
   
   // Estados para el formulario de crear vaca
   const [nuevaCaravana, setNuevaCaravana] = useState('')
-  const [tieneCelo, setTieneCelo] = useState(false) // Checkbox para saber si ponemos fecha
-  const [fechaCelo, setFechaCelo] = useState('') // La fecha elegida
+  const [tieneCelo, setTieneCelo] = useState(false)
+  const [fechaCelo, setFechaCelo] = useState('')
 
   useEffect(() => {
     obtenerAlertas()
@@ -27,7 +29,7 @@ function App() {
 
   const obtenerAlertas = async () => {
     try {
-      const respuesta = await fetch('http://127.0.0.1:8000/api/alertas-celo/')
+      const respuesta = await fetch(`${API_URL}/api/alertas-celo/`)
       const datos = await respuesta.json()
       setVacasEnAlerta(datos)
       setCargando(false)
@@ -40,7 +42,7 @@ function App() {
   const registrarCelo = async (vacaId, caravana) => {
     if (!window.confirm(`¿Seguro que quieres registrar el celo de la vaca ${caravana} hoy?`)) return
     try {
-      const respuesta = await fetch('http://127.0.0.1:8000/api/registrar-celo/', {
+      const respuesta = await fetch(`${API_URL}/api/registrar-celo/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vaca_id: vacaId })
@@ -57,7 +59,7 @@ function App() {
 
   const cargarTodasLasVacas = async () => {
     try {
-      const respuesta = await fetch('http://127.0.0.1:8000/api/vacas/', {
+      const respuesta = await fetch(`${API_URL}/api/vacas/`, {
         headers: { 'Authorization': `Token ${token}` }
       })
       if (respuesta.ok) {
@@ -73,7 +75,6 @@ function App() {
     e.preventDefault()
     if (!nuevaCaravana) return
 
-    // Preparamos los datos según si eligió poner fecha o no
     const datosVaca = {
       caravana: nuevaCaravana,
       activa: true,
@@ -81,7 +82,7 @@ function App() {
     }
 
     try {
-      const respuesta = await fetch('http://127.0.0.1:8000/api/vacas/', {
+      const respuesta = await fetch(`${API_URL}/api/vacas/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,13 +93,11 @@ function App() {
 
       if (respuesta.ok) {
         alert(`🐄 Vaca ${nuevaCaravana} agregada exitosamente al sistema.`)
-        // Limpiamos el formulario
         setNuevaCaravana('')
         setTieneCelo(false)
         setFechaCelo('')
         cargarTodasLasVacas() 
       } else {
-        // Si hay error, leemos qué nos dice Django
         const errorData = await respuesta.json()
         console.error("Motivo del error de Django:", errorData)
         alert("Error al crear la vaca. Puede que la caravana ya exista. Revisa la consola (F12) para más detalles.")
@@ -111,7 +110,7 @@ function App() {
   const borrarVaca = async (vacaId, caravana) => {
     if (!window.confirm(`⚠️ ¿ESTÁS SEGURO? Vas a eliminar la vaca ${caravana} definitivamente del sistema.`)) return
     try {
-      const respuesta = await fetch(`http://127.0.0.1:8000/api/vacas/${vacaId}/`, {
+      const respuesta = await fetch(`${API_URL}/api/vacas/${vacaId}/`, {
         method: 'DELETE',
         headers: { 'Authorization': `Token ${token}` }
       })
@@ -179,7 +178,6 @@ function App() {
               <button onClick={cerrarSesion} style={estilos.botonSalir}>Cerrar Sesión</button>
             </div>
 
-            {/* FORMULARIO MEJORADO PARA AGREGAR VACA */}
             <form onSubmit={crearVaca} style={estilos.formularioVaca}>
               <input 
                 type="text" 
@@ -230,7 +228,6 @@ function App() {
   )
 }
 
-// Estilos
 const estilos = {
   contenedor: { padding: '20px', maxWidth: '500px', margin: '0 auto', fontFamily: 'Arial, sans-serif' },
   titulo: { textAlign: 'center', color: '#333' },
@@ -241,8 +238,6 @@ const estilos = {
   caravana: { fontSize: '48px', margin: '0', color: '#333' },
   textoInfo: { fontSize: '16px', color: '#555', textAlign: 'right' },
   boton: { backgroundColor: '#5cb85c', color: 'white', border: 'none', borderRadius: '8px', padding: '20px', fontSize: '20px', fontWeight: 'bold', width: '100%', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' },
-  
-  // Estilos del dueño
   panelDueno: { backgroundColor: '#e8f5e9', padding: '15px', borderRadius: '12px', marginTop: '15px', border: '1px solid #c8e6c9' },
   botonSalir: { backgroundColor: '#d9534f', color: 'white', border: 'none', borderRadius: '5px', padding: '5px 10px', cursor: 'pointer' },
   formularioVaca: { display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'white', padding: '15px', borderRadius: '8px', border: '1px solid #ccc' },

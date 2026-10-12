@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://tambo-backend-v6yp.onrender.com';
+
 function Login({ onLoginExitoso }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -7,7 +9,7 @@ function Login({ onLoginExitoso }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch('http://localhost:8000/api/login/', {
+            const res = await fetch(`${API_URL}/api/login/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -15,9 +17,7 @@ function Login({ onLoginExitoso }) {
 
             if (res.ok) {
                 const data = await res.json();
-                // 1. Guardamos la "llave" en la memoria del navegador
                 localStorage.setItem('token', data.token);
-                // 2. Le avisamos a la app que ya somos dueños
                 onLoginExitoso(data.token); 
                 alert('¡Bienvenido! Modo Dueño activado.');
             } else {

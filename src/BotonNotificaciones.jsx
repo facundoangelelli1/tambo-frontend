@@ -1,8 +1,6 @@
-// frontend_tambo/src/BotonNotificaciones.jsx
-
 import React from 'react';
 
-// Reemplaza con tu Public Key de VAPID generada anteriormente
+const API_URL = import.meta.env.VITE_API_URL || 'https://tambo-backend-v6yp.onrender.com';
 const VAPID_PUBLIC_KEY = 'BOThkGmpMS-Lmlso4k0LvELzC47A8JeLLZoeuaG9W3iXk0WEVjCEcRr1vdxWjOW_vyJxVrm8pk6tNt7H7USzeHY';
 
 function urlBase64ToUint8Array(base64String) {
@@ -29,19 +27,17 @@ const BotonNotificaciones = () => {
 
                 const register = await navigator.serviceWorker.register('/sw.js');
                 
-                // --- CANCELAR CUALQUIER SUSCRIPCIÓN VIEJA ---
                 const suscripcionVieja = await register.pushManager.getSubscription();
                 if (suscripcionVieja) {
                     await suscripcionVieja.unsubscribe();
                 }
 
-                // --- CREAR NUEVA SUSCRIPCIÓN CON LA CLAVE ACTUAL ---
                 const subscription = await register.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                 });
 
-                const res = await fetch('http://localhost:8000/api/suscripcion-push/', {
+                const res = await fetch(`${API_URL}/api/suscripcion-push/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -62,7 +58,6 @@ const BotonNotificaciones = () => {
         }
     };
         
-
     return (
         <button 
             onClick={activarNotificaciones}
